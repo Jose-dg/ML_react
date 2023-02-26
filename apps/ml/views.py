@@ -19,13 +19,13 @@ class PreProcesamientoView(APIView):
         import matplotlib.pyplot as plt
         import pandas as pd
 
-        #2) Importar Dataset
+        #2) Importar Dataset 
         path = os.path.join(settings.BASE_DIR, 'apps/ml/data/preprocesamiento/Data.csv')
         dataset = pd.read_csv(path)
         X = dataset.iloc[:,17:-1].values
         y = dataset.iloc[:, -1].values
-        # print(X)
-        # print(y)
+        print(X)
+        print(y)
 
         #3) Procesar Datos Faltantes
         from sklearn.impute import SimpleImputer
@@ -40,8 +40,12 @@ class PreProcesamientoView(APIView):
         from sklearn.compose import ColumnTransformer
         from sklearn.preprocessing import OneHotEncoder
         ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [0])], remainder="passthrough")
+        '''En esta línea de código en particular, la instancia ct de la clase ColumnTransformer se está creando con un único transformador. El transformador se especifica como una tupla con tres elementos: el nombre del transformador (en este caso, 'encoder'), el transformador en sí (en este caso, una instancia de la clase OneHotEncoder()), y una lista de índices de columna a los que se aplicará el transformador (en este caso, [0]).
+        Lo que esta línea de código hace es aplicar el transformador OneHotEncoder() a la primera columna (índice 0) de un conjunto de datos. El transformador OneHotEncoder() se utiliza para convertir variables categóricas en variables numéricas codificadas en caliente (one-hot).
+        El argumento remainder="passthrough" significa que las columnas que no se especifican en la lista de transformadores se deben pasar sin cambios, lo que significa que las columnas restantes no se transformarán.
+        '''
         X = np.array(ct.fit_transform(X))
-        # print(X)
+        print(X)
 
         # Codificación de la variable dependiente
         from sklearn.preprocessing import LabelEncoder
