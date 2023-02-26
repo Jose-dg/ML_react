@@ -1,7 +1,8 @@
 from pathlib import Path
 import os
 import environ
-
+import dj_database_url
+ 
 env = environ.Env()
 environ.Env.read_env()
 
@@ -17,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -112,16 +113,27 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://postgres:postgres@localhost:5432/mysite',
+        conn_max_age=600
+    )
 }
 
 # DATABASES = {
 #     "default": env.db("DATABASE_URL"),
 # }
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 # Password validation
@@ -171,6 +183,15 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'build/static')
 ]
 
+if not DEBUG:
+    # Tell Django to copy statics to the `staticfiles` directory
+    # in your application directory on Render.
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Turn on WhiteNoise storage backend that takes care of compressing static files
+    # and creating unique names for each version so they can safely be cached forever.
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -192,3 +213,5 @@ AUTHENTICATION_BACKENDS = (
 FILE_UPLOAD_PERMISSIONS = 0o640
 
 EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend'
+
+ 
